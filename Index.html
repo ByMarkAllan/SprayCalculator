@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F7F7F4">
+  <title>Sprayer Calculator | RanchAssist</title>
+  <style>
+    :root{
+      --ra-black:#0A0A09;--ra-white:#FFFFFF;--ra-canvas:#F7F7F4;--ra-soft:#F1F1ED;
+      --ra-text:#171715;--ra-muted:#666660;--ra-tertiary:#81817A;--ra-border:#DEDED8;
+      --ra-border-strong:#C5C5BD;--ra-green:#4C6752;--ra-green-soft:#E7EEE8;
+      --ra-warning:#A16C32;--ra-warning-soft:#F4ECE1;--ra-danger:#B44845;--ra-danger-soft:#F5E6E5;
+      --ra-info:#536C80;--radius:10px;--shadow:0 1px 2px rgba(10,10,9,.04),0 8px 24px rgba(10,10,9,.05);
+      --font:"Geist","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+    *{box-sizing:border-box}
+    html{background:var(--ra-canvas);color:var(--ra-text);font-family:var(--font)}
+    body{margin:0;background:var(--ra-canvas);min-width:0}
+    button,input,select,textarea{font:inherit;color:inherit}
+    button{cursor:pointer}
+    :focus-visible{outline:3px solid rgba(10,10,9,.16);outline-offset:2px}
+    .shell{max-width:1360px;margin:0 auto;padding:0 32px}
+    .app-header{position:sticky;top:0;z-index:30;background:rgba(247,247,244,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--ra-border)}
+    .header-inner{height:64px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+    .brand{display:flex;align-items:center;gap:10px;min-width:0;font-size:14px;white-space:nowrap}
+    .brand strong{font-weight:750;letter-spacing:.08em}.brand .slash{color:var(--ra-border-strong)}.brand .tool{overflow:hidden;text-overflow:ellipsis;color:var(--ra-muted)}
+    .header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{min-height:42px;border:1px solid var(--ra-border-strong);border-radius:7px;background:#fff;padding:0 14px;font-weight:650;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none}
+    .btn:hover{background:var(--ra-soft)}.btn.primary{background:var(--ra-black);color:#fff;border-color:var(--ra-black)}.btn.primary:hover{background:#242422}
+    .btn.danger{color:var(--ra-danger);border-color:#D9B7B5}.btn.small{min-height:36px;padding:0 11px;font-size:12px}.btn.ghost{background:transparent;border-color:transparent}
+    details.menu{position:relative}details.menu>summary{list-style:none}details.menu>summary::-webkit-details-marker{display:none}
+    .menu-pop{position:absolute;right:0;top:48px;min-width:210px;padding:6px;background:#fff;border:1px solid var(--ra-border);border-radius:9px;box-shadow:var(--shadow);z-index:50}
+    .menu-pop button{width:100%;border:0;background:transparent;text-align:left;padding:10px 11px;border-radius:6px;font-size:13px;font-weight:550}.menu-pop button:hover{background:var(--ra-soft)}
+    .hero{padding:46px 0 26px}.kicker{font-size:11px;font-weight:750;letter-spacing:.11em;text-transform:uppercase;color:var(--ra-muted);margin-bottom:10px}
+    h1{font-size:clamp(30px,4vw,42px);line-height:1.04;letter-spacing:-.035em;margin:0 0 10px;font-weight:650}.lede{max-width:760px;margin:0;color:var(--ra-muted);font-size:16px;line-height:1.55}
+    .notice{margin-top:20px;border:1px solid #D7C3AA;background:var(--ra-warning-soft);border-radius:10px;padding:15px 16px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+    .notice-mark{width:28px;height:28px;border:1px solid #D7C3AA;border-radius:50%;display:grid;place-items:center;font-weight:800;color:var(--ra-warning)}
+    .notice strong{display:block;font-size:13px;margin-bottom:3px}.notice p{margin:0;color:#6E5638;font-size:13px;line-height:1.5}
+    .session-bar{margin:0 0 20px;border:1px solid var(--ra-border);background:#fff;border-radius:9px;padding:12px 14px;display:flex;align-items:center;gap:12px;justify-content:space-between;font-size:12px;color:var(--ra-muted)}
+    .session-bar strong{color:var(--ra-text)}.status-chip{border:1px solid var(--ra-border);border-radius:999px;padding:5px 9px;background:var(--ra-soft);white-space:nowrap;font-weight:650;color:var(--ra-text)}
+    .workspace{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);gap:22px;align-items:start;padding-bottom:80px}
+    .panel{background:#fff;border:1px solid var(--ra-border);border-radius:12px;overflow:hidden}.panel+.panel{margin-top:16px}
+    .panel-head{padding:18px 20px;border-bottom:1px solid var(--ra-border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.panel-head h2,.panel-head h3{margin:0;font-size:18px}.panel-head p{margin:5px 0 0;color:var(--ra-muted);font-size:12px;line-height:1.45}
+    .panel-body{padding:20px}.section-label{font-size:11px;font-weight:750;letter-spacing:.09em;text-transform:uppercase;color:var(--ra-muted);margin-bottom:12px}
+    .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:6px;background:var(--ra-soft);border:1px solid var(--ra-border);border-radius:9px;margin-bottom:16px}
+    .tab{min-height:42px;border:0;border-radius:6px;background:transparent;font-size:12px;font-weight:700;color:var(--ra-muted);padding:7px 8px}.tab[aria-selected="true"]{background:#fff;color:var(--ra-text);box-shadow:0 1px 2px rgba(10,10,9,.05)}
+    .grid{display:grid;gap:14px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .field{min-width:0}.field label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:650;color:#353532;margin-bottom:7px}.field .meta{font-size:10px;font-weight:750;letter-spacing:.08em;text-transform:uppercase;color:var(--ra-warning)}
+    .field input,.field select,.field textarea{width:100%;min-height:44px;background:#fff;border:1px solid #CFCFC8;border-radius:7px;padding:9px 11px;font-size:14px}.field textarea{min-height:92px;resize:vertical;line-height:1.5}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ra-black);outline:none;box-shadow:0 0 0 3px rgba(10,10,9,.08)}
+    .field .help{margin-top:6px;font-size:11.5px;color:var(--ra-muted);line-height:1.4}.suffix-wrap{position:relative}.suffix-wrap input{padding-right:48px}.suffix{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--ra-muted);pointer-events:none}
+    .divider{height:1px;background:var(--ra-border);margin:20px 0}.subhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}.subhead h3{font-size:15px;margin:0}.subhead p{font-size:12px;color:var(--ra-muted);margin:3px 0 0}
+    .product-list{display:grid;gap:10px}.product-card{border:1px solid var(--ra-border);border-radius:9px;padding:14px;background:#fff}.product-top{display:flex;gap:10px;align-items:flex-start}.product-top .field{flex:1}.product-grid{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:10px;margin-top:10px}.product-remove{width:38px;height:38px;border:1px solid var(--ra-border);border-radius:7px;background:#fff;color:var(--ra-danger);font-size:18px;flex:0 0 auto}.product-remove:hover{background:var(--ra-danger-soft)}
+    .segmented{display:flex;gap:6px;border:1px solid var(--ra-border);border-radius:8px;padding:4px;background:var(--ra-soft)}.segmented button{flex:1;min-height:34px;border:0;border-radius:5px;background:transparent;font-size:11px;font-weight:700;color:var(--ra-muted)}.segmented button.active{background:#fff;color:var(--ra-text)}
+    .results{position:sticky;top:84px}.metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-bottom:1px solid var(--ra-border)}.metric{padding:18px 20px;min-height:106px}.metric:nth-child(odd){border-right:1px solid var(--ra-border)}.metric:nth-child(-n+2){border-bottom:1px solid var(--ra-border)}.metric-label{font-size:10px;letter-spacing:.09em;text-transform:uppercase;font-weight:750;color:var(--ra-muted);margin-bottom:7px}.metric-value{font-variant-numeric:tabular-nums;font-size:clamp(27px,3vw,38px);letter-spacing:-.03em;font-weight:650;line-height:1.02;overflow-wrap:anywhere}.metric-context{margin-top:6px;font-size:11.5px;color:var(--ra-muted);line-height:1.35}
+    .result-section{padding:18px 20px;border-bottom:1px solid var(--ra-border)}.result-section:last-child{border-bottom:0}.result-section h3{font-size:14px;margin:0 0 12px}.tank-card{background:var(--ra-black);color:#fff;border-radius:10px;padding:16px}.tank-card .eyebrow{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#BDBDB6;font-weight:750}.tank-card .tank-title{font-size:19px;margin:6px 0 14px;font-weight:650}.tank-line{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid #33332F;font-size:12px}.tank-line strong{text-align:right;font-variant-numeric:tabular-nums}.tank-note{font-size:10.5px;line-height:1.4;color:#C8C8C1;margin-top:12px}
+    .result-table{width:100%;border-collapse:collapse;font-size:12px}.result-table th{text-align:left;background:var(--ra-soft);padding:9px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.07em}.result-table th.num,.result-table td.num{text-align:right}.result-table td{padding:10px;border-bottom:1px solid var(--ra-border);vertical-align:top}.result-table tr:last-child td{border-bottom:0}
+    .breakdown{display:grid;gap:8px}.breakdown-row{display:flex;justify-content:space-between;gap:20px;font-size:12px;padding:3px 0}.breakdown-row span:first-child{color:var(--ra-muted)}.breakdown-row strong{font-variant-numeric:tabular-nums}.breakdown-row.total{border-top:1px solid var(--ra-border);padding-top:10px;margin-top:3px;color:var(--ra-text);font-size:13px}.breakdown-row.total span:first-child{color:var(--ra-text);font-weight:700}
+    .bar{height:9px;background:var(--ra-soft);border-radius:999px;overflow:hidden}.bar>span{display:block;height:100%;background:var(--ra-green);width:0}.bar-meta{display:flex;justify-content:space-between;gap:10px;font-size:10.5px;color:var(--ra-muted);margin-top:6px}
+    details.calc{border-top:1px solid var(--ra-border)}details.calc summary{cursor:pointer;list-style:none;padding:15px 20px;font-size:12px;font-weight:700}details.calc summary::-webkit-details-marker{display:none}.calc-body{padding:0 20px 18px;font-size:12px;color:var(--ra-muted);line-height:1.55}.formula{background:var(--ra-soft);border:1px solid var(--ra-border);border-radius:7px;padding:10px 11px;margin-top:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#353532;white-space:pre-wrap;overflow-wrap:anywhere}
+    .empty{padding:14px;border:1px dashed var(--ra-border-strong);border-radius:8px;color:var(--ra-muted);font-size:12px;line-height:1.45}.error{display:none;margin-top:12px;background:var(--ra-danger-soft);border:1px solid #D9B7B5;color:#7C3532;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.45}.error.show{display:block}
+    .toast{position:fixed;right:20px;bottom:20px;z-index:100;background:var(--ra-black);color:#fff;border-radius:8px;padding:11px 14px;font-size:12px;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);pointer-events:none;transition:.18s ease}.toast.show{opacity:1;transform:translateY(0)}
+    dialog{border:0;border-radius:12px;padding:0;max-width:500px;width:calc(100% - 32px);box-shadow:0 18px 70px rgba(0,0,0,.18)}dialog::backdrop{background:rgba(10,10,9,.45)}.dialog-head{padding:18px 20px;border-bottom:1px solid var(--ra-border);display:flex;justify-content:space-between;align-items:center}.dialog-head h2{font-size:18px;margin:0}.dialog-body{padding:20px}.dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.close-x{border:0;background:transparent;font-size:22px;line-height:1;width:36px;height:36px;border-radius:6px}.close-x:hover{background:var(--ra-soft)}
+    .mobile-result-strip{display:none}.hidden{display:none!important}.print-only{display:none}
+    @media(max-width:1023px){.shell{padding:0 24px}.workspace{grid-template-columns:1fr}.results{position:static}.metric-grid{grid-template-columns:repeat(4,1fr)}.metric{border-bottom:0!important;border-right:1px solid var(--ra-border)!important}.metric:last-child{border-right:0!important}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.product-grid .field:first-child{grid-column:span 2}}
+    @media(max-width:767px){.shell{padding:0 16px}.app-header{position:relative}.header-inner{height:auto;min-height:62px;padding:10px 0;align-items:flex-start}.brand{padding-top:10px}.brand .slash,.brand .tool{display:none}.header-actions{gap:6px}.header-actions>.btn{display:none}.hero{padding:30px 0 20px}.lede{font-size:15px}.notice{grid-template-columns:1fr}.notice-mark{display:none}.session-bar{align-items:flex-start;flex-direction:column}.workspace{gap:14px;padding-bottom:110px}.tabs{grid-template-columns:repeat(2,1fr)}.grid.two,.grid.three{grid-template-columns:1fr}.panel-head,.panel-body{padding-left:16px;padding-right:16px}.product-grid{grid-template-columns:1fr}.product-grid .field:first-child{grid-column:auto}.metric-grid{grid-template-columns:repeat(2,1fr)}.metric{border-right:0!important}.metric:nth-child(odd){border-right:1px solid var(--ra-border)!important}.metric:nth-child(-n+2){border-bottom:1px solid var(--ra-border)!important}.metric-value{font-size:29px}.result-section{padding:16px}.mobile-result-strip{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:28;background:#fff;border-top:1px solid var(--ra-border);padding:10px 16px max(10px,env(safe-area-inset-bottom));align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -4px 18px rgba(10,10,9,.05)}.mobile-result-strip .m-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ra-muted);font-weight:750}.mobile-result-strip .m-value{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}.mobile-result-strip .btn{min-height:46px}.toast{left:16px;right:16px;bottom:84px;text-align:center}}
+    @media(max-width:380px){.metric{padding:15px 13px}.metric-value{font-size:25px}.tabs{gap:4px}.tab{font-size:11px}}
+    @media print{body{background:#fff}#tankSection,#productResultSection,#costSection,#coverageVisual{display:block!important}.print-summary{margin:0 0 18px}.print-summary pre{white-space:pre-wrap;font:11px/1.5 var(--font);border:1px solid #ddd;padding:12px;border-radius:6px}.no-print,.app-header,.mobile-result-strip,.toast,dialog{display:none!important}.print-only{display:block}.shell{max-width:none;padding:0}.hero{padding:0 0 18px}.notice{break-inside:avoid}.workspace{display:block;padding:0}.workspace>.left{display:none}.results{position:static}.panel{border:0}.metric-grid{grid-template-columns:repeat(4,1fr);border:1px solid #ddd}.metric{border-right:1px solid #ddd!important;border-bottom:0!important}.result-section{break-inside:avoid}.tank-card{background:#fff;color:#111;border:1px solid #bbb}.tank-card .eyebrow,.tank-card .tank-note{color:#555}.tank-line{border-top:1px solid #ccc}.calc{display:none}.print-only h2{font-size:24px;margin:0 0 6px}.print-only p{font-size:12px;color:#666}}
+  </style>
+</head>
+<body>
+  <script>window.RANCHASSIST_CONFIG = <?!= runtimeConfig ?>;</script>
+  <header class="app-header no-print">
+    <div class="shell header-inner">
+      <div class="brand" aria-label="RanchAssist Sprayer Calculator"><strong>RANCHASSIST™</strong><span class="slash">/</span><span class="tool">Sprayer Calculator</span></div>
+      <div class="header-actions">
+        <button class="btn small" id="openProjectBtn" type="button">Open Project</button>
+        <button class="btn small" id="saveProjectBtn" type="button">Save Project</button>
+        <details class="menu">
+          <summary class="btn small">Project</summary>
+          <div class="menu-pop">
+            <button type="button" data-action="open-project">Open Project</button>
+            <button type="button" data-action="save-project">Save Project</button>
+            <button type="button" data-action="duplicate-project">Duplicate Project</button>
+            <button type="button" data-action="clear-session">Clear Session</button>
+          </div>
+        </details>
+        <details class="menu">
+          <summary class="btn small">Export</summary>
+          <div class="menu-pop">
+            <button type="button" data-action="export-csv">Export CSV</button>
+            <button type="button" data-action="print">Print / Save PDF</button>
+          </div>
+        </details>
+        <details class="menu">
+          <summary class="btn small">Share</summary>
+          <div class="menu-pop">
+            <button type="button" data-action="copy-summary">Copy Summary</button>
+            <button type="button" data-action="email">Email Summary</button>
+          </div>
+        </details>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="kicker">Land · Application planning</div>
+      <h1>Sprayer Calculator</h1>
+      <p class="lede">Calculate tank mixes, coverage, calibration, refill count, chemical quantity, and estimated application cost per acre.</p>
+      <div class="notice" role="note" aria-label="Pesticide and herbicide label notice">
+        <div class="notice-mark">!</div>
+        <div><strong>The product label controls.</strong><p>Enter the applicable labeled rate yourself. The pesticide or herbicide label is the controlling source for legal application rate, PPE, restrictions, re-entry, grazing or haying intervals, environmental precautions, and tank-mixing requirements. RanchAssist does not recommend products or off-label rates.</p></div>
+      </div>
+    </section>
+
+    <div class="session-bar no-print">
+      <div><strong>Session only</strong> · RanchAssist does not permanently store this project. Save a RanchAssist <code>.ra</code> project file to continue later, or export your results before leaving.</div>
+      <span class="status-chip" id="saveStatus">Unsaved</span>
+    </div>
+
+    <div class="print-only" id="printHeader"><h2>RanchAssist™ Sprayer Calculator</h2><p id="printMeta"></p></div><div class="print-only print-summary"><pre id="printSummary"></pre></div>
+
+    <div class="workspace">
+      <div class="left">
+        <section class="panel no-print">
+          <div class="panel-body">
+            <div class="tabs" role="tablist" aria-label="Sprayer calculator modes">
+              <button class="tab" type="button" data-mode="mix" role="tab">Mix Calculator</button>
+              <button class="tab" type="button" data-mode="coverage" role="tab">Coverage</button>
+              <button class="tab" type="button" data-mode="calibration" role="tab">Calibration</button>
+              <button class="tab" type="button" data-mode="cost" role="tab">Cost / Acre</button>
+            </div>
+            <div class="field">
+              <label for="projectName">Project name <span style="font-weight:500;color:var(--ra-muted)">Optional</span></label>
+              <input id="projectName" data-path="projectName" type="text" maxlength="120" placeholder="Example: South Pasture Spray Plan">
+            </div>
+          </div>
+        </section>
+
+        <section class="panel no-print" data-visible-modes="mix coverage cost">
+          <div class="panel-head"><div><h2>Field & tank</h2><p>Define the job size and target spray volume. Example values are planning examples only.</p></div></div>
+          <div class="panel-body">
+            <div class="grid three">
+              <div class="field"><label for="acres">Field area <span class="meta">Assumption</span></label><div class="suffix-wrap"><input id="acres" data-path="fieldInputs.acres" type="number" min="0" step="0.01" inputmode="decimal"><span class="suffix">ac</span></div><div class="help">Area you intend to treat.</div></div>
+              <div class="field"><label for="gpa">Target spray volume <span class="meta">Assumption</span></label><div class="suffix-wrap"><input id="gpa" data-path="fieldInputs.gpa" type="number" min="0" step="0.01" inputmode="decimal"><span class="suffix">GPA</span></div><div class="help">Use the volume required by your equipment and product label.</div></div>
+              <div class="field"><label for="tankSize">Usable tank volume</label><div class="suffix-wrap"><input id="tankSize" data-path="tankInputs.tankSize" type="number" min="0" step="0.1" inputmode="decimal"><span class="suffix">gal</span></div><div class="help">Use actual usable fill capacity.</div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel no-print" data-visible-modes="mix cost">
+          <div class="panel-head"><div><h2>Products</h2><p>Add each herbicide, pesticide, surfactant, dye, or other labeled mix component. Rates are never prefilled.</p></div><button class="btn small" type="button" id="addProductBtn">Add Product</button></div>
+          <div class="panel-body">
+            <div class="product-list" id="productList"></div>
+            <div class="empty hidden" id="productEmpty">No products added. Add a product, then enter the rate directly from the label.</div>
+          </div>
+        </section>
+
+        <section class="panel no-print" data-visible-modes="calibration cost">
+          <div class="panel-head"><div><h2>Sprayer calibration</h2><p>Calculate actual GPA from boom geometry, travel speed, and nozzle flow or a catch test.</p></div></div>
+          <div class="panel-body">
+            <div class="subhead"><div><h3>Boom setup</h3><p>Choose the width input that matches your sprayer.</p></div></div>
+            <div class="segmented" id="widthModeSeg" aria-label="Boom width method">
+              <button type="button" data-width-mode="boom">Boom width</button><button type="button" data-width-mode="spacing">Spacing × nozzles</button>
+            </div>
+            <div class="divider"></div>
+            <div class="grid three">
+              <div class="field" data-width-field="boom"><label>Boom width</label><div class="suffix-wrap"><input data-path="calibrationInputs.boomWidthFt" type="number" min="0" step="0.1" inputmode="decimal"><span class="suffix">ft</span></div></div>
+              <div class="field" data-width-field="spacing"><label>Nozzle spacing</label><div class="suffix-wrap"><input data-path="calibrationInputs.nozzleSpacingIn" type="number" min="0" step="0.1" inputmode="decimal"><span class="suffix">in</span></div></div>
+              <div class="field"><label>Nozzle count</label><input data-path="calibrationInputs.nozzleCount" type="number" min="1" step="1" inputmode="numeric"></div>
+              <div class="field"><label>Travel speed</label><div class="suffix-wrap"><input data-path="calibrationInputs.speedMph" type="number" min="0" step="0.1" inputmode="decimal"><span class="suffix">mph</span></div></div>
+            </div>
+            <div class="divider"></div>
+            <div class="subhead"><div><h3>Nozzle flow</h3><p>Enter measured GPM or derive it from a catch test.</p></div></div>
+            <div class="segmented" id="flowModeSeg" aria-label="Nozzle flow method">
+              <button type="button" data-flow-mode="gpm">Known nozzle GPM</button><button type="button" data-flow-mode="catch">Catch test</button>
+            </div>
+            <div class="divider"></div>
+            <div class="grid three" data-flow-fields="gpm">
+              <div class="field"><label>Flow per nozzle</label><div class="suffix-wrap"><input data-path="calibrationInputs.nozzleGpm" type="number" min="0" step="0.001" inputmode="decimal"><span class="suffix">GPM</span></div></div>
+            </div>
+            <div class="grid three" data-flow-fields="catch">
+              <div class="field"><label>Total catch volume</label><div class="suffix-wrap"><input data-path="calibrationInputs.catchOz" type="number" min="0" step="0.1" inputmode="decimal"><span class="suffix">fl oz</span></div><div class="help">Combined liquid captured from all tested nozzles.</div></div>
+              <div class="field"><label>Catch time</label><div class="suffix-wrap"><input data-path="calibrationInputs.catchSeconds" type="number" min="0" step="0.1" inputmode="decimal"><span class="suffix">sec</span></div></div>
+              <div class="field"><label>Nozzles tested</label><input data-path="calibrationInputs.catchNozzles" type="number" min="1" step="1" inputmode="numeric"></div>
+            </div>
+            <div class="error" id="calibrationError"></div>
+          </div>
+        </section>
+
+        <section class="panel no-print" data-visible-modes="cost">
+          <div class="panel-head"><div><h2>Application cost</h2><p>Estimate prorated product usage plus carrier, labor, equipment, fuel, and other job costs.</p></div></div>
+          <div class="panel-body">
+            <div class="grid three">
+              <div class="field"><label>Carrier cost</label><div class="suffix-wrap"><input data-path="costInputs.carrierCostPerGal" type="number" min="0" step="0.001" inputmode="decimal"><span class="suffix">$/gal</span></div></div>
+              <div class="field"><label>Labor</label><div class="suffix-wrap"><input data-path="costInputs.laborPerHour" type="number" min="0" step="0.01" inputmode="decimal"><span class="suffix">$/hr</span></div></div>
+              <div class="field"><label>Equipment</label><div class="suffix-wrap"><input data-path="costInputs.equipmentPerHour" type="number" min="0" step="0.01" inputmode="decimal"><span class="suffix">$/hr</span></div></div>
+              <div class="field"><label>Fuel / operating</label><div class="suffix-wrap"><input data-path="costInputs.fuelPerHour" type="number" min="0" step="0.01" inputmode="decimal"><span class="suffix">$/hr</span></div></div>
+              <div class="field"><label>Other fixed cost</label><div class="suffix-wrap"><input data-path="costInputs.otherFixed" type="number" min="0" step="0.01" inputmode="decimal"><span class="suffix">$</span></div></div>
+              <div class="field"><label>Manual job time <span style="font-weight:500;color:var(--ra-muted)">Fallback</span></label><div class="suffix-wrap"><input data-path="costInputs.manualHours" type="number" min="0" step="0.1" inputmode="decimal"><span class="suffix">hr</span></div><div class="help">Calibration-derived time is used when valid; otherwise this value is used.</div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel no-print">
+          <div class="panel-head"><div><h2>Notes</h2><p>Record field conditions, nozzle changes, label references, or other planning context.</p></div></div>
+          <div class="panel-body"><div class="field"><label for="notes">Project notes <span style="font-weight:500;color:var(--ra-muted)">Optional</span></label><textarea id="notes" data-path="notes" maxlength="5000" placeholder="Example: Verify label-specific grazing interval before application."></textarea></div></div>
+        </section>
+      </div>
+
+      <aside class="results">
+        <section class="panel" aria-live="polite">
+          <div class="panel-head"><div><div class="kicker" style="margin-bottom:6px">Live results</div><h2 id="resultsTitle">Mix plan</h2><p id="resultsSubtitle">Tank quantities update as inputs change.</p></div></div>
+          <div class="metric-grid">
+            <div class="metric"><div class="metric-label" id="m1Label">Total spray volume</div><div class="metric-value" id="m1Value">0 gal</div><div class="metric-context" id="m1Context">Acres × target GPA</div></div>
+            <div class="metric"><div class="metric-label" id="m2Label">Acres per tank</div><div class="metric-value" id="m2Value">0 ac</div><div class="metric-context" id="m2Context">Usable tank ÷ GPA</div></div>
+            <div class="metric"><div class="metric-label" id="m3Label">Tank loads</div><div class="metric-value" id="m3Value">0</div><div class="metric-context" id="m3Context">Includes a partial final load</div></div>
+            <div class="metric"><div class="metric-label" id="m4Label">Final load</div><div class="metric-value" id="m4Value">0 gal</div><div class="metric-context" id="m4Context">Exact final spray volume</div></div>
+          </div>
+
+          <div class="result-section" id="tankSection">
+            <h3>Per-tank instruction card</h3>
+            <div class="tank-card" id="tankCard"></div>
+          </div>
+
+          <div class="result-section" id="productResultSection">
+            <h3>Product quantities</h3>
+            <div id="productResults"></div>
+          </div>
+
+          <div class="result-section" id="costSection">
+            <h3>Cost breakdown</h3>
+            <div class="breakdown" id="costBreakdown"></div>
+          </div>
+
+          <div class="result-section" id="coverageVisual">
+            <h3>Tank coverage</h3>
+            <div class="bar"><span id="coverageBar"></span></div>
+            <div class="bar-meta"><span id="coverageBarLeft">0 ac / tank</span><span id="coverageBarRight">0 ac project</span></div>
+          </div>
+
+          <details class="calc">
+            <summary>View Calculation Details →</summary>
+            <div class="calc-body" id="calculationDetails"></div>
+          </details>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <div class="mobile-result-strip no-print">
+    <div><div class="m-label" id="mobileLabel">Tank loads</div><div class="m-value" id="mobileValue">0</div></div>
+    <button type="button" class="btn primary" id="mobileSaveBtn">Save Project</button>
+  </div>
+
+  <input id="projectFileInput" type="file" accept=".ra,application/json,application/x-ranchassist-project" class="hidden">
+
+  <dialog id="emailDialog">
+    <div class="dialog-head"><h2>Email summary</h2><button class="close-x" type="button" data-close-dialog aria-label="Close">×</button></div>
+    <div class="dialog-body">
+      <div class="field"><label for="emailTo">Recipient email</label><input id="emailTo" type="email" autocomplete="email" placeholder="name@example.com"></div>
+      <div class="error" id="emailError"></div>
+      <div class="dialog-actions"><button class="btn" type="button" data-close-dialog>Cancel</button><button class="btn primary" id="sendEmailBtn" type="button">Send Summary</button></div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  (()=>{
+    'use strict';
+    const TOOL={id:'sprayer-calculator',name:'Sprayer Calculator',version:'1.0.0',formatVersion:'1.0'};
+    const SESSION_KEY='ranchassist:sprayer-calculator:session:v1';
+    const config=window.RANCHASSIST_CONFIG||{};
+    const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+    const nowIso=()=>new Date().toISOString();
+    const uuid=()=>{try{return crypto.randomUUID()}catch(e){return 'ra-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}};
+    const clampNum=(v,min=0,max=1e9)=>{const n=Number(v);return Number.isFinite(n)?Math.min(max,Math.max(min,n)):0};
+    const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(Number.isFinite(n)?n:0);
+    const num=(n,d=2)=>new Intl.NumberFormat('en-US',{maximumFractionDigits:d}).format(Number.isFinite(n)?n:0);
+    const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const deepClone=o=>JSON.parse(JSON.stringify(o));
+    const defaultState=()=>({
+      mode:'mix',projectName:'Sprayer Plan',
+      fieldInputs:{acres:40,gpa:15},tankInputs:{tankSize:300},
+      products:[{id:uuid(),name:'',rate:'',unit:'oz_ac',customUnit:'units',containerSize:'',containerUnit:'gal',containerPrice:''}],
+      calibrationInputs:{widthMode:'boom',boomWidthFt:30,nozzleSpacingIn:20,nozzleCount:18,speedMph:5,flowMode:'gpm',nozzleGpm:0.2,catchOz:'',catchSeconds:60,catchNozzles:1},
+      costInputs:{carrierCostPerGal:0,laborPerHour:0,equipmentPerHour:0,fuelPerHour:0,otherFixed:0,manualHours:0},notes:''
+    });
+    let state=defaultState();
+    let project={id:uuid(),name:'Sprayer Plan',createdAt:nowIso(),updatedAt:nowIso()};
+    let lastSavedHash='';
+    let toastTimer=null;
+
+    function getPath(obj,path){return path.split('.').reduce((a,k)=>a?.[k],obj)}
+    function setPath(obj,path,val){const keys=path.split('.');let cur=obj;keys.slice(0,-1).forEach(k=>{if(!cur[k]||typeof cur[k]!=='object')cur[k]={};cur=cur[k]});cur[keys.at(-1)]=val}
+    function simpleHash(value){let h=2166136261;for(let i=0;i<value.length;i++){h^=value.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16)}
+    function stateHash(){return simpleHash(JSON.stringify(state))}
+    function markStatus(){const el=$('#saveStatus');if(!el)return;const current=stateHash();el.textContent=lastSavedHash&&lastSavedHash===current?'Saved':'Unsaved changes';}
+    function saveSession(){try{sessionStorage.setItem(SESSION_KEY,JSON.stringify({project,state,lastSavedHash}))}catch(e){} markStatus()}
+    function loadSession(){try{const raw=sessionStorage.getItem(SESSION_KEY);if(!raw)return false;const saved=JSON.parse(raw);if(saved&&saved.state&&saved.project){state={...defaultState(),...saved.state};state.fieldInputs={...defaultState().fieldInputs,...saved.state.fieldInputs};state.tankInputs={...defaultState().tankInputs,...saved.state.tankInputs};state.calibrationInputs={...defaultState().calibrationInputs,...saved.state.calibrationInputs};state.costInputs={...defaultState().costInputs,...saved.state.costInputs};state.products=Array.isArray(saved.state.products)?saved.state.products:[];project=saved.project;lastSavedHash=saved.lastSavedHash||'';return true}}catch(e){}return false}
+    function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2500)}
+    function sanitizeFilename(name){return String(name||'Sprayer_Plan').trim().replace(/[\\/:*?"<>|\x00-\x1F]/g,'_').replace(/\s+/g,'_').replace(/_+/g,'_').slice(0,100)||'Sprayer_Plan'}
+    function download(name,content,type='text/plain;charset=utf-8'){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+    function closeMenus(){document.querySelectorAll('details.menu[open]').forEach(d=>d.removeAttribute('open'))}
+
+    function hydrateInputs(){
+      $$('[data-path]').forEach(el=>{const v=getPath(state,el.dataset.path);if(el.type==='checkbox')el.checked=!!v;else el.value=v??''});
+      $('#projectName').value=state.projectName||project.name||'Sprayer Plan';
+      renderMode();renderProducts();syncCalibrationUI();
+    }
+
+    function renderMode(){
+      $$('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.mode===state.mode)));
+      $$('[data-visible-modes]').forEach(el=>{const modes=el.dataset.visibleModes.split(/\s+/);el.classList.toggle('hidden',!modes.includes(state.mode))});
+      const labels={mix:['Mix plan','Tank quantities update as inputs change.'],coverage:['Coverage plan','See acres per tank, total loads, and refill count.'],calibration:['Calibration results','Audit GPA, capacity, and operating rate.'],cost:['Application cost','Estimate chemical and operating cost per acre.']};
+      $('#resultsTitle').textContent=labels[state.mode][0];$('#resultsSubtitle').textContent=labels[state.mode][1];
+      $('#tankSection').classList.toggle('hidden',state.mode==='calibration');
+      $('#productResultSection').classList.toggle('hidden',state.mode==='coverage'||state.mode==='calibration');
+      $('#costSection').classList.toggle('hidden',state.mode!=='cost');
+      $('#coverageVisual').classList.toggle('hidden',state.mode==='calibration');
+      calculate();
+    }
+
+    const unitOptions=[['oz_ac','fl oz / acre'],['pt_ac','pt / acre'],['qt_ac','qt / acre'],['gal_ac','gal / acre'],['oz_100gal','fl oz / 100 gal'],['percent','% solution'],['custom_ac','Custom / acre']];
+    const containerOptions=[['floz','fl oz'],['pt','pt'],['qt','qt'],['gal','gal'],['custom','Custom unit']];
+    function renderProducts(){
+      const list=$('#productList');list.innerHTML='';$('#productEmpty').classList.toggle('hidden',state.products.length>0);
+      state.products.forEach((p,i)=>{
+        const card=document.createElement('div');card.className='product-card';card.dataset.productId=p.id;
+        card.innerHTML=`<div class="product-top"><div class="field"><label>Product ${i+1} name</label><input data-product-field="name" maxlength="120" value="${escapeHtml(p.name||'')}" placeholder="Enter product name from label"></div><button class="product-remove" type="button" data-remove-product aria-label="Remove product">×</button></div>
+          <div class="product-grid">
+            <div class="field"><label>Label rate</label><input data-product-field="rate" type="number" min="0" step="0.001" inputmode="decimal" value="${escapeHtml(p.rate??'')}" placeholder="0"></div>
+            <div class="field"><label>Rate unit</label><select data-product-field="unit">${unitOptions.map(([v,t])=>`<option value="${v}" ${p.unit===v?'selected':''}>${t}</option>`).join('')}</select></div>
+            <div class="field ${p.unit==='custom_ac'?'':'hidden'}" data-custom-unit><label>Custom unit</label><input data-product-field="customUnit" value="${escapeHtml(p.customUnit||'units')}" maxlength="30"></div>
+            <div class="field"><label>Container size</label><input data-product-field="containerSize" type="number" min="0" step="0.001" inputmode="decimal" value="${escapeHtml(p.containerSize??'')}" placeholder="Optional"></div>
+            <div class="field"><label>Container unit</label><select data-product-field="containerUnit">${containerOptions.map(([v,t])=>`<option value="${v}" ${p.containerUnit===v?'selected':''}>${t}</option>`).join('')}</select></div>
+            <div class="field"><label>Container price</label><div class="suffix-wrap"><input data-product-field="containerPrice" type="number" min="0" step="0.01" inputmode="decimal" value="${escapeHtml(p.containerPrice??'')}" placeholder="Optional"><span class="suffix">$</span></div></div>
+          </div>`;
+        list.appendChild(card);
+      });
+    }
+
+    function syncCalibrationUI(){
+      $$('#widthModeSeg button').forEach(b=>b.classList.toggle('active',b.dataset.widthMode===state.calibrationInputs.widthMode));
+      $$('[data-width-field]').forEach(el=>el.classList.toggle('hidden',el.dataset.widthField!==state.calibrationInputs.widthMode));
+      $$('#flowModeSeg button').forEach(b=>b.classList.toggle('active',b.dataset.flowMode===state.calibrationInputs.flowMode));
+      $$('[data-flow-fields]').forEach(el=>el.classList.toggle('hidden',el.dataset.flowFields!==state.calibrationInputs.flowMode));
+    }
+
+    function productCalc(p,acres,sprayGallons){
+      const rate=clampNum(p.rate);let flOz=0,custom=0,kind='volume';
+      switch(p.unit){
+        case 'oz_ac':flOz=rate*acres;break;case 'pt_ac':flOz=rate*16*acres;break;case 'qt_ac':flOz=rate*32*acres;break;case 'gal_ac':flOz=rate*128*acres;break;
+        case 'oz_100gal':flOz=rate*(sprayGallons/100);break;case 'percent':flOz=sprayGallons*128*(rate/100);break;
+        case 'custom_ac':kind='custom';custom=rate*acres;break;default:kind='custom';custom=rate*acres;
+      }
+      let usageCost=0,costReady=false,containerEq=0;const size=clampNum(p.containerSize),price=clampNum(p.containerPrice);
+      if(size>0&&price>=0){
+        if(kind==='volume'&&p.containerUnit!=='custom'){
+          const factor={floz:1,pt:16,qt:32,gal:128}[p.containerUnit]||0;const containerOz=size*factor;if(containerOz>0){containerEq=flOz/containerOz;usageCost=containerEq*price;costReady=true}
+        }else if(kind==='custom'&&p.containerUnit==='custom'){containerEq=custom/size;usageCost=containerEq*price;costReady=true}
+      }
+      return {kind,flOz,custom,usageCost,costReady,containerEq};
+    }
+    function formatVolumeOz(oz){oz=Number(oz)||0;if(oz>=128)return `${num(oz/128,3)} gal (${num(oz,1)} fl oz)`;if(oz>=32)return `${num(oz/32,2)} qt (${num(oz,1)} fl oz)`;if(oz>=16)return `${num(oz/16,2)} pt (${num(oz,1)} fl oz)`;return `${num(oz,2)} fl oz`}
+    function formatProductAmount(calc,p){return calc.kind==='volume'?formatVolumeOz(calc.flOz):`${num(calc.custom,3)} ${escapeHtml(p.customUnit||'units')}`}
+
+    function baseCalc(){
+      const acres=clampNum(state.fieldInputs.acres),gpa=clampNum(state.fieldInputs.gpa),tank=clampNum(state.tankInputs.tankSize);
+      const total=acres*gpa,acresPerTank=gpa>0?tank/gpa:0;
+      let full=0,partial=0,loads=0;
+      if(tank>0&&total>0){full=Math.floor((total+1e-9)/tank);partial=total-full*tank;if(partial<1e-7)partial=0;loads=full+(partial>0?1:0)}
+      const finalLoad=loads? (partial>0?partial:tank):0;const partialAcres=gpa>0?partial/gpa:0;
+      return {acres,gpa,tank,total,acresPerTank,full,partial,loads,finalLoad,partialAcres,refills:Math.max(0,loads-1)};
+    }
+
+    function calibrationCalc(){
+      const c=state.calibrationInputs;const count=Math.max(1,Math.round(clampNum(c.nozzleCount,1,10000)));const speed=clampNum(c.speedMph);
+      const widthFt=c.widthMode==='spacing'?clampNum(c.nozzleSpacingIn)*count/12:clampNum(c.boomWidthFt);
+      let nozzleGpm=clampNum(c.nozzleGpm);
+      if(c.flowMode==='catch'){
+        const oz=clampNum(c.catchOz),sec=clampNum(c.catchSeconds),tested=Math.max(1,Math.round(clampNum(c.catchNozzles,1,10000)));
+        nozzleGpm=(sec>0)?((oz/tested)/128)*(60/sec):0;
+      }
+      const totalGpm=nozzleGpm*count;const gpa=(speed>0&&widthFt>0)?5940*totalGpm/(speed*widthFt*12):0;
+      const acresHour=(widthFt>0&&speed>0)?widthFt*speed/8.25:0;const carrierHour=totalGpm*60;const tank=clampNum(state.tankInputs.tankSize);const tankMinutes=carrierHour>0?tank/carrierHour*60:0;
+      return {count,speed,widthFt,nozzleGpm,totalGpm,gpa,acresHour,carrierHour,tankMinutes};
+    }
+
+    function costCalc(base,cal){
+      const productRows=state.products.map(p=>({p,calc:productCalc(p,base.acres,base.total)}));
+      const chemical=productRows.reduce((s,r)=>s+(r.calc.costReady?r.calc.usageCost:0),0);
+      const c=state.costInputs;const hours=cal.acresHour>0&&base.acres>0?base.acres/cal.acresHour:clampNum(c.manualHours);
+      const carrier=base.total*clampNum(c.carrierCostPerGal);const labor=hours*clampNum(c.laborPerHour);const equipment=hours*clampNum(c.equipmentPerHour);const fuel=hours*clampNum(c.fuelPerHour);const other=clampNum(c.otherFixed);
+      const total=chemical+carrier+labor+equipment+fuel+other;return {productRows,chemical,carrier,labor,equipment,fuel,other,hours,total,costPerAcre:base.acres>0?total/base.acres:0};
+    }
+
+    function calculate(){
+      const b=baseCalc(),cal=calibrationCalc(),cost=costCalc(b,cal);
+      renderMetrics(b,cal,cost);renderTankCard(b);renderProductResults(b,cost);renderCost(cost,b,cal);renderCoverage(b);renderCalDetails(b,cal,cost);renderCalibrationError(cal);updatePrintMeta(b,cost);saveSession();
+    }
+
+    function setMetric(i,label,value,context){$(`#m${i}Label`).textContent=label;$(`#m${i}Value`).textContent=value;$(`#m${i}Context`).textContent=context}
+    function renderMetrics(b,cal,cost){
+      if(state.mode==='mix'){setMetric(1,'Total spray volume',`${num(b.total,1)} gal`,'Acres × target GPA');setMetric(2,'Acres per tank',`${num(b.acresPerTank,2)} ac`,'Usable tank ÷ GPA');setMetric(3,'Tank loads',num(b.loads,0),`${num(b.full,0)} full${b.partial>0?' + 1 partial':''}`);setMetric(4,'Final load',`${num(b.finalLoad,1)} gal`,b.partial>0?`${num(b.partialAcres,2)} ac in partial load`:'No partial load');$('#mobileLabel').textContent='Tank loads';$('#mobileValue').textContent=num(b.loads,0)}
+      if(state.mode==='coverage'){setMetric(1,'Acres per tank',`${num(b.acresPerTank,2)} ac`,'Tank gallons ÷ GPA');setMetric(2,'Tank loads',num(b.loads,0),'Total loads for project');setMetric(3,'Refills',num(b.refills,0),'After the initial fill');setMetric(4,'Total spray volume',`${num(b.total,1)} gal`,'Project carrier/final mix volume');$('#mobileLabel').textContent='Acres / tank';$('#mobileValue').textContent=`${num(b.acresPerTank,1)} ac`}
+      if(state.mode==='calibration'){setMetric(1,'Calculated GPA',`${num(cal.gpa,2)}`,'Actual flow ÷ speed ÷ boom width');setMetric(2,'Field capacity',`${num(cal.acresHour,2)} ac/hr`,'Theoretical, before turns/refills');setMetric(3,'Carrier rate',`${num(cal.carrierHour,1)} gal/hr`,'Total boom flow × 60');setMetric(4,'Tank duration',`${num(cal.tankMinutes,1)} min`,'At measured flow');$('#mobileLabel').textContent='Calculated GPA';$('#mobileValue').textContent=num(cal.gpa,1)}
+      if(state.mode==='cost'){setMetric(1,'Estimated job cost',money(cost.total),'Prorated product + operating costs');setMetric(2,'Cost per acre',money(cost.costPerAcre),b.acres>0?`${num(b.acres,2)} treated acres`:'Enter acres');setMetric(3,'Chemical cost',money(cost.chemical),'Products with container pricing entered');setMetric(4,'Estimated job time',`${num(cost.hours,2)} hr`,cal.acresHour>0?'From calibration capacity':'Manual fallback time');$('#mobileLabel').textContent='Cost / acre';$('#mobileValue').textContent=money(cost.costPerAcre)}
+    }
+
+    function renderTankCard(b){
+      const card=$('#tankCard');if(!b.loads||!b.gpa||!b.tank){card.innerHTML='<div class="eyebrow">Tank instructions</div><div class="tank-title">Enter acres, GPA, and tank size.</div>';return}
+      const fullAcres=b.acresPerTank;const lastAcres=b.partial>0?b.partialAcres:fullAcres;const lastGallons=b.finalLoad;
+      const fullProducts=state.products.filter(p=>clampNum(p.rate)>0).map(p=>{const q=productCalc(p,fullAcres,b.tank);return `<div class="tank-line"><span>${escapeHtml(p.name||'Unnamed product')}</span><strong>${formatProductAmount(q,p)}</strong></div>`}).join('');
+      const lastProducts=state.products.filter(p=>clampNum(p.rate)>0).map(p=>{const q=productCalc(p,lastAcres,lastGallons);return `<div class="tank-line"><span>${escapeHtml(p.name||'Unnamed product')}</span><strong>${formatProductAmount(q,p)}</strong></div>`}).join('');
+      card.innerHTML=`<div class="eyebrow">Full tank · ${num(fullAcres,2)} acres</div><div class="tank-title">Make ${num(b.tank,1)} gal final spray volume</div>${fullProducts||'<div class="tank-line"><span>Products</span><strong>Enter label rates</strong></div>'}<div class="tank-note">Add carrier and products in the order and manner required by each label, then finish to the stated final spray volume.</div>${b.partial>0?`<div style="height:16px"></div><div class="eyebrow">Final partial tank · ${num(lastAcres,2)} acres</div><div class="tank-title">Make ${num(lastGallons,1)} gal final spray volume</div>${lastProducts||'<div class="tank-line"><span>Products</span><strong>Enter label rates</strong></div>'}`:''}`;
+    }
+
+    function renderProductResults(b,cost){
+      const el=$('#productResults');const rows=cost.productRows.filter(r=>clampNum(r.p.rate)>0);
+      if(!rows.length){el.innerHTML='<div class="empty">Add a product and enter its label rate to calculate total and per-tank quantities.</div>';return}
+      el.innerHTML=`<table class="result-table"><thead><tr><th>Product</th><th>Total</th><th class="num">Full tank</th><th class="num">Use cost</th></tr></thead><tbody>${rows.map(r=>{const full=productCalc(r.p,b.acresPerTank,b.tank);return `<tr><td><strong>${escapeHtml(r.p.name||'Unnamed product')}</strong><br><span style="color:var(--ra-muted)">${escapeHtml(unitOptions.find(x=>x[0]===r.p.unit)?.[1]||'Custom')}</span></td><td>${formatProductAmount(r.calc,r.p)}</td><td class="num">${formatProductAmount(full,r.p)}</td><td class="num">${r.calc.costReady?money(r.calc.usageCost):'—'}</td></tr>`}).join('')}</tbody></table>`;
+    }
+
+    function renderCost(cost,b,cal){
+      $('#costBreakdown').innerHTML=`<div class="breakdown-row"><span>Products (prorated use)</span><strong>${money(cost.chemical)}</strong></div><div class="breakdown-row"><span>Carrier</span><strong>${money(cost.carrier)}</strong></div><div class="breakdown-row"><span>Labor · ${num(cost.hours,2)} hr</span><strong>${money(cost.labor)}</strong></div><div class="breakdown-row"><span>Equipment · ${num(cost.hours,2)} hr</span><strong>${money(cost.equipment)}</strong></div><div class="breakdown-row"><span>Fuel / operating</span><strong>${money(cost.fuel)}</strong></div><div class="breakdown-row"><span>Other fixed cost</span><strong>${money(cost.other)}</strong></div><div class="breakdown-row total"><span>Total job cost</span><strong>${money(cost.total)}</strong></div><div class="breakdown-row"><span>Cost per acre</span><strong>${money(cost.costPerAcre)}</strong></div>`;
+    }
+
+    function renderCoverage(b){const pct=b.loads>0&&b.tank>0?Math.min(100,b.finalLoad/b.tank*100):0;$('#coverageBar').style.width=`${pct}%`;$('#coverageBarLeft').textContent=`${num(b.acresPerTank,2)} ac / full tank`;$('#coverageBarRight').textContent=`${num(b.acres,2)} ac project`}
+    function renderCalibrationError(cal){const el=$('#calibrationError');const problems=[];if(cal.widthFt<=0)problems.push('Enter a boom width or valid nozzle spacing/count.');if(cal.speed<=0)problems.push('Travel speed must be greater than 0 mph.');if(cal.nozzleGpm<=0)problems.push(state.calibrationInputs.flowMode==='catch'?'Enter catch volume and a catch time greater than 0 seconds.':'Enter nozzle flow greater than 0 GPM.');el.textContent=problems.join(' ');el.classList.toggle('show',problems.length>0&&state.mode==='calibration')}
+
+    function renderCalDetails(b,cal,cost){
+      const c=state.calibrationInputs;const widthSource=c.widthMode==='spacing'?`${num(clampNum(c.nozzleSpacingIn),2)} in × ${cal.count} nozzles ÷ 12`:`${num(clampNum(c.boomWidthFt),2)} ft`;
+      const flowSource=c.flowMode==='catch'?`(${num(clampNum(c.catchOz),2)} fl oz ÷ ${Math.max(1,Math.round(clampNum(c.catchNozzles,1)))}) ÷ 128 × (60 ÷ ${num(clampNum(c.catchSeconds),2)} sec)`:`${num(clampNum(c.nozzleGpm),4)} GPM / nozzle`;
+      $('#calculationDetails').innerHTML=`
+        <strong>Coverage</strong><div class="formula">Total spray volume = acres × GPA\n${num(b.acres,2)} × ${num(b.gpa,2)} = ${num(b.total,2)} gal\n\nAcres per tank = tank gallons ÷ GPA\n${num(b.tank,2)} ÷ ${num(b.gpa,2)} = ${num(b.acresPerTank,3)} ac</div>
+        <br><strong>Calibration</strong><div class="formula">Boom width = ${widthSource} = ${num(cal.widthFt,3)} ft\nNozzle flow = ${flowSource} = ${num(cal.nozzleGpm,4)} GPM/nozzle\nTotal flow = ${num(cal.nozzleGpm,4)} × ${cal.count} = ${num(cal.totalGpm,4)} GPM\nGPA = 5,940 × total GPM ÷ (mph × boom width in inches)\n= 5,940 × ${num(cal.totalGpm,4)} ÷ (${num(cal.speed,2)} × ${num(cal.widthFt*12,2)})\n= ${num(cal.gpa,3)} GPA\nAcres/hour = boom width ft × mph ÷ 8.25 = ${num(cal.acresHour,3)} ac/hr</div>
+        <br><strong>Cost</strong><div class="formula">Job hours = acres ÷ calibrated acres/hour (when calibration is valid), otherwise manual hours\n= ${num(cost.hours,3)} hr\nTotal job cost = chemical + carrier + labor + equipment + fuel + other\n= ${money(cost.total)}\nCost/acre = total job cost ÷ acres = ${money(cost.costPerAcre)}</div>
+        <p style="margin:10px 0 0">Rounding is for display only; calculations use unrounded values. Calibration capacity is theoretical and does not account for turns, overlap, refill time, terrain, or field interruptions.</p>`;
+    }
+
+    function updatePrintMeta(b,cost){$('#printMeta').textContent=`${state.projectName||'Sprayer Plan'} · ${num(b.acres,2)} acres · ${num(b.gpa,2)} GPA · ${num(b.loads,0)} tank load(s) · ${new Date().toLocaleString()}`;$('#printSummary').textContent=buildSummary()}
+
+    function buildSummary(){
+      const b=baseCalc(),cal=calibrationCalc(),cost=costCalc(b,cal);const lines=[];
+      lines.push('RANCHASSIST™ SPRAYER CALCULATOR',state.projectName||'Sprayer Plan','');
+      lines.push(`Field area: ${num(b.acres,2)} ac`,`Target spray volume: ${num(b.gpa,2)} GPA`,`Tank size: ${num(b.tank,1)} gal`,`Total spray volume: ${num(b.total,1)} gal`,`Acres per tank: ${num(b.acresPerTank,2)} ac`,`Tank loads: ${num(b.loads,0)} (${num(b.full,0)} full${b.partial>0?' + 1 partial':''})`,`Refills: ${num(b.refills,0)}`);
+      if(b.partial>0)lines.push(`Final partial tank: ${num(b.partial,1)} gal for ${num(b.partialAcres,2)} ac`);
+      if(state.products.some(p=>clampNum(p.rate)>0)){lines.push('','PRODUCTS');state.products.filter(p=>clampNum(p.rate)>0).forEach(p=>{const q=productCalc(p,b.acres,b.total);const full=productCalc(p,b.acresPerTank,b.tank);lines.push(`${p.name||'Unnamed product'}: ${formatProductAmount(q,p)} total; ${formatProductAmount(full,p)} per full tank`)});}
+      if(cal.gpa>0)lines.push('','CALIBRATION',`Calculated GPA: ${num(cal.gpa,2)}`,`Field capacity: ${num(cal.acresHour,2)} ac/hr`,`Carrier rate: ${num(cal.carrierHour,1)} gal/hr`,`Tank duration: ${num(cal.tankMinutes,1)} min`);
+      lines.push('','COST',`Estimated job cost: ${money(cost.total)}`,`Cost per acre: ${money(cost.costPerAcre)}`,`Chemical cost: ${money(cost.chemical)}`,`Estimated job time: ${num(cost.hours,2)} hr`);
+      if(state.notes)lines.push('','NOTES',state.notes);
+      lines.push('','LABEL NOTICE','The pesticide/herbicide label is the controlling source for legal application rate, PPE, restrictions, re-entry, grazing/haying intervals, environmental precautions, and tank-mixing requirements. RanchAssist does not recommend products or off-label rates.','',`Generated ${new Date().toLocaleString()}`);
+      return lines.join('\n');
+    }
+
+    function exportCsv(){
+      const b=baseCalc(),cal=calibrationCalc(),cost=costCalc(b,cal);const rows=[['Section','Item','Value','Unit/Notes'],['Project','Project name',state.projectName||'Sprayer Plan',''],['Field','Area',b.acres,'ac'],['Field','Target spray volume',b.gpa,'GPA'],['Tank','Usable tank size',b.tank,'gal'],['Coverage','Total spray volume',b.total,'gal'],['Coverage','Acres per tank',b.acresPerTank,'ac'],['Coverage','Tank loads',b.loads,'loads'],['Coverage','Refills',b.refills,'refills'],['Calibration','Calculated GPA',cal.gpa,'GPA'],['Calibration','Acres per hour',cal.acresHour,'ac/hr'],['Calibration','Carrier per hour',cal.carrierHour,'gal/hr'],['Calibration','Tank duration',cal.tankMinutes,'min']];
+      cost.productRows.forEach(({p,calc})=>rows.push(['Product',p.name||'Unnamed product',calc.kind==='volume'?calc.flOz:calc.custom,calc.kind==='volume'?'fl oz total':`${p.customUnit||'units'} total`]));
+      rows.push(['Cost','Chemical cost',cost.chemical,'USD'],['Cost','Carrier cost',cost.carrier,'USD'],['Cost','Labor cost',cost.labor,'USD'],['Cost','Equipment cost',cost.equipment,'USD'],['Cost','Fuel/operating cost',cost.fuel,'USD'],['Cost','Other cost',cost.other,'USD'],['Cost','Total job cost',cost.total,'USD'],['Cost','Cost per acre',cost.costPerAcre,'USD/ac']);
+      const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');download(`${sanitizeFilename(state.projectName)}_Sprayer_Calculator.csv`,csv,'text/csv;charset=utf-8');toast('CSV exported.');closeMenus();
+    }
+
+    function buildRA(){project.name=state.projectName||'Sprayer Plan';project.updatedAt=nowIso();return {raFile:true,formatVersion:TOOL.formatVersion,tool:{id:TOOL.id,name:TOOL.name,version:TOOL.version},project:deepClone(project),preferences:{units:'imperial'},state:deepClone(state),spatial:null,metadata:{generator:'RanchAssist',schema:'ra-project'}}}
+    function saveProject(){const file=buildRA();download(`${sanitizeFilename(file.project.name)}.ra`,JSON.stringify(file,null,2),'application/x-ranchassist-project');lastSavedHash=stateHash();saveSession();toast('Project saved. Your RanchAssist .ra project file is ready.');closeMenus()}
+    function migrateProjectData(data){const version=String(data?.formatVersion||'');if(version===TOOL.formatVersion)return data;throw new Error('This project was created with an unsupported RanchAssist project format and cannot be opened safely in this version.')}
+    async function openProjectFile(file){
+      try{const text=await file.text();let data=JSON.parse(text);if(!data||data.raFile!==true)throw new Error('Not a RanchAssist project. Choose a .ra file exported from RanchAssist.');if(data.tool?.id!==TOOL.id)throw new Error(`Different RanchAssist tool. This project belongs to ${data.tool?.name||'another tool'}.`);data=migrateProjectData(data);if(!data.project?.id||!data.state||typeof data.state!=='object')throw new Error('Project is incomplete. This file is missing information required to restore the project.');
+        state={...defaultState(),...data.state};state.fieldInputs={...defaultState().fieldInputs,...data.state.fieldInputs};state.tankInputs={...defaultState().tankInputs,...data.state.tankInputs};state.calibrationInputs={...defaultState().calibrationInputs,...data.state.calibrationInputs};state.costInputs={...defaultState().costInputs,...data.state.costInputs};state.products=Array.isArray(data.state.products)?data.state.products.map(p=>({...p,id:p.id||uuid()})):[];project={...data.project};state.projectName=state.projectName||project.name||'Sprayer Plan';lastSavedHash=stateHash();hydrateInputs();saveSession();toast('Project opened. Your saved RanchAssist project has been restored.');
+      }catch(err){alert(err.message||'Project file could not be read. The file may be incomplete or damaged.')}
+    }
+    function duplicateProject(){const name=prompt('Name the duplicate project:',`${state.projectName||'Sprayer Plan'} Copy`);if(name===null)return;project={id:uuid(),name:name.trim()||'Sprayer Plan Copy',createdAt:nowIso(),updatedAt:nowIso()};state.projectName=project.name;lastSavedHash='';hydrateInputs();saveProject()}
+    function clearSession(){if(!confirm('Clear this session?\n\nThis removes the current unsaved RanchAssist project from this browser session. Saved .ra files on your device will not be affected.'))return;try{sessionStorage.removeItem(SESSION_KEY)}catch(e){}state=defaultState();project={id:uuid(),name:'Sprayer Plan',createdAt:nowIso(),updatedAt:nowIso()};lastSavedHash='';hydrateInputs();calculate();toast('Session cleared.');closeMenus()}
+
+    async function copySummary(){const text=buildSummary();try{await navigator.clipboard.writeText(text)}catch(e){const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove()}toast('Summary copied.');closeMenus()}
+    function openEmail(){const dlg=$('#emailDialog');$('#emailError').classList.remove('show');if(typeof dlg.showModal==='function')dlg.showModal();else{const to=prompt('Recipient email:');if(to)sendEmail(to)}closeMenus()}
+    function sendEmail(toOverride){const to=(toOverride||$('#emailTo').value||'').trim();const err=$('#emailError');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){err.textContent='Enter a valid recipient email address.';err.classList.add('show');return}err.classList.remove('show');const payload={to,subject:`RanchAssist Sprayer Plan — ${state.projectName||'Sprayer Plan'}`,plainText:buildSummary()};const btn=$('#sendEmailBtn');btn.disabled=true;btn.textContent='Sending…';
+      if(window.google?.script?.run){google.script.run.withSuccessHandler(()=>{btn.disabled=false;btn.textContent='Send Summary';$('#emailDialog').close();toast('Summary emailed.')}).withFailureHandler(e=>{btn.disabled=false;btn.textContent='Send Summary';err.textContent=e?.message||'Email could not be sent.';err.classList.add('show')}).sendSprayerSummary(payload)}else{btn.disabled=false;btn.textContent='Send Summary';location.href=`mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(payload.subject)}&body=${encodeURIComponent(payload.plainText)}`;if($('#emailDialog').open)$('#emailDialog').close()}
+    }
+
+    function handleAction(action){const map={'open-project':()=>$('#projectFileInput').click(),'save-project':saveProject,'duplicate-project':duplicateProject,'clear-session':clearSession,'export-csv':exportCsv,'print':()=>{closeMenus();window.print()},'copy-summary':copySummary,'email':openEmail};map[action]?.()}
+
+    document.addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a)handleAction(a.dataset.action);const tab=e.target.closest('.tab[data-mode]');if(tab){state.mode=tab.dataset.mode;renderMode();saveSession()}const wm=e.target.closest('[data-width-mode]');if(wm){state.calibrationInputs.widthMode=wm.dataset.widthMode;syncCalibrationUI();calculate()}const fm=e.target.closest('[data-flow-mode]');if(fm){state.calibrationInputs.flowMode=fm.dataset.flowMode;syncCalibrationUI();calculate()}if(e.target.matches('[data-close-dialog]'))$('#emailDialog').close()});
+    document.addEventListener('input',e=>{const path=e.target.dataset.path;if(path){let v=e.target.value;if(e.target.type==='number')v=e.target.value===''?'':Number(e.target.value);setPath(state,path,v);if(path==='projectName'){state.projectName=v;project.name=v||'Sprayer Plan'}calculate()}});
+    document.addEventListener('change',e=>{const path=e.target.dataset.path;if(path){let v=e.target.value;if(e.target.type==='number')v=e.target.value===''?'':Number(e.target.value);setPath(state,path,v);calculate()}});
+    $('#productList').addEventListener('input',e=>{const card=e.target.closest('[data-product-id]');const f=e.target.dataset.productField;if(!card||!f)return;const p=state.products.find(x=>x.id===card.dataset.productId);if(!p)return;p[f]=e.target.type==='number'?(e.target.value===''?'':Number(e.target.value)):e.target.value;calculate()});
+    $('#productList').addEventListener('change',e=>{const card=e.target.closest('[data-product-id]');const f=e.target.dataset.productField;if(!card||!f)return;const p=state.products.find(x=>x.id===card.dataset.productId);if(!p)return;p[f]=e.target.value;if(f==='unit'){card.querySelector('[data-custom-unit]').classList.toggle('hidden',e.target.value!=='custom_ac')}calculate()});
+    $('#productList').addEventListener('click',e=>{if(!e.target.closest('[data-remove-product]'))return;const card=e.target.closest('[data-product-id]');state.products=state.products.filter(x=>x.id!==card.dataset.productId);renderProducts();calculate()});
+    $('#addProductBtn').addEventListener('click',()=>{state.products.push({id:uuid(),name:'',rate:'',unit:'oz_ac',customUnit:'units',containerSize:'',containerUnit:'gal',containerPrice:''});renderProducts();calculate();const cards=$$('.product-card');cards.at(-1)?.querySelector('input')?.focus()});
+    $('#openProjectBtn').addEventListener('click',()=>$('#projectFileInput').click());$('#saveProjectBtn').addEventListener('click',saveProject);$('#mobileSaveBtn').addEventListener('click',saveProject);
+    $('#projectFileInput').addEventListener('change',e=>{const f=e.target.files?.[0];if(f)openProjectFile(f);e.target.value=''});$('#sendEmailBtn').addEventListener('click',()=>sendEmail());
+    window.addEventListener('beforeunload',e=>{if(stateHash()!==lastSavedHash){e.preventDefault();e.returnValue=''}});
+
+    loadSession();hydrateInputs();calculate();
+  })();
+  </script>
+</body>
+</html>
